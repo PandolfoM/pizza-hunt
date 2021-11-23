@@ -32,36 +32,39 @@ function saveRecord(record) {
 }
 
 function uploadPizza() {
-  const transaction = db.transaction(["new_pizza", "readwrite"]);
+  // open a transaction on your pending db
+  const transaction = db.transaction(['new_pizza'], 'readwrite');
 
-  const pizzaObjectStore = transaction.objectStore("new_pizza");
+  // access your pending object store
+  const pizzaObjectStore = transaction.objectStore('new_pizza');
 
+  // get all records from store and set to a variable
   const getAll = pizzaObjectStore.getAll();
 
-  getAll.onsuccess = function () {
+  getAll.onsuccess = function() {
+    // if there was data in indexedDb's store, let's send it to the api server
     if (getAll.result.length > 0) {
-      fetch("/api/pizzas", {
-        method: "POST",
+      fetch('/api/pizzas', {
+        method: 'POST',
         body: JSON.stringify(getAll.result),
         headers: {
-          Accept: "application/json, text/plain, */*",
-          "Content-Type": "application/json",
-        },
+          Accept: 'application/json, text/plain, */*',
+          'Content-Type': 'application/json'
+        }
       })
-        .then((response) => response.json())
-        .then((serverResponse) => {
+        .then(response => response.json())
+        .then(serverResponse => {
           if (serverResponse.message) {
             throw new Error(serverResponse);
           }
-          const transaction = db.transaction(["new_pizza"], "readwrite");
 
-          const pizzaObjectStore = transaction.objectStore("new_pizza");
-
+          const transaction = db.transaction(['new_pizza'], 'readwrite');
+          const pizzaObjectStore = transaction.objectStore('new_pizza');
+          // clear all items in your store
           pizzaObjectStore.clear();
-
-          alert("All saved pizza has been submitted!");
         })
-        .catch((err) => {
+        .catch(err => {
+          // set reference to redirect back here
           console.log(err);
         });
     }
