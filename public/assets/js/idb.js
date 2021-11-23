@@ -1,33 +1,32 @@
 let db;
+const request = indexedDB.open('pizza_hunt', 1);
 
-// create an object store (table) called `new_pizza`, set it to have an auto incrementing primary key of sorts
-const request = indexedDB.open("pizza_hunt", 1);
-
-// this event will emit if the database version changes (nonexistant to version 1, v1 to v2, etc.)
-request.onupgradeneeded = function (event) {
-  // save a reference to the database
+request.onupgradeneeded = function(event) {
   const db = event.target.result;
-  // create an object store (table) called `new_pizza`, set it to have an auto incrementing primary key of sorts
-  db.createObjectStore("new_pizza", { autoIncrement: true });
+  db.createObjectStore('new_pizza', { autoIncrement: true });
 };
 
-request.onsuccess = function (event) {
+request.onsuccess = function(event) {
+  // when db is successfully created with its object store (from onupgradedneeded event above), save reference to db in global variable
   db = event.target.result;
 
+  // check if app is online, if yes run checkDatabase() function to send all local db data to api
   if (navigator.onLine) {
     uploadPizza();
   }
 };
 
-request.onerror = function (event) {
+request.onerror = function(event) {
+  // log error here
   console.log(event.target.errorCode);
 };
 
 function saveRecord(record) {
-  const transaction = db.transaction(["new_pizza"], "readwrite");
+  const transaction = db.transaction(['new_pizza'], 'readwrite');
 
-  const pizzaObjectStore = transaction.objectStore("new_pizza");
+  const pizzaObjectStore = transaction.objectStore('new_pizza');
 
+  // add record to your store with add method.
   pizzaObjectStore.add(record);
 }
 
@@ -71,4 +70,5 @@ function uploadPizza() {
   };
 }
 
-window.addEventListener("online", uploadPizza);
+// listen for app coming back online
+window.addEventListener('online', uploadPizza);
