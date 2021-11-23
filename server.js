@@ -9,21 +9,10 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
 app.use(require('./routes'));
 
-const m_url = 'mongodb://127.0.0.1:27017/',
-    db_name = 'pizza-hunt',       // use your db name
-    m_options = {
-        'auto_reconnect': true,
-        useNewUrlParser: true,
-        useCreateIndex: true,
-        useUnifiedTopology: true
-    }
-
-mongoose.connect(m_url + db_name, m_options, function (err) {
-    if (err) {
-        console.log('Mongo Error ' + err);
-    } else {
-        console.log('MongoDB Connection Established');
-    }
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1/pizza-hunt', {
+  useFindAndModify: false,
+  useNewUrlParser: true,
+  useUnifiedTopology: true
 });
 
 // Use this to log mongo queries being executed!
